@@ -1,5 +1,7 @@
 
 import { useEffect, useState } from "react";
+import PastPapers from "./components/PastPapers";
+
 import {
   BookOpen,
   GraduationCap,
@@ -117,7 +119,7 @@ const subjects = [
     description: "Language and literature.",
   },
   {
-    name: "itsonga Home Language",
+    name: "itsonga",
     category: "Languages",
     code: "TSO HL",
     description: "Language and literature.",
@@ -349,10 +351,7 @@ function App() {
         JSON.stringify(mySubjects)
       );
     } catch (error) {
-      console.error(
-        "Unable to save selected subjects:",
-        error
-      );
+      console.error("Unable to save selected subjects:", error);
     }
   }, [mySubjects]);
 
@@ -459,9 +458,7 @@ function App() {
 
       {/* SIDEBAR */}
 
-      <aside
-        className={`sidebar ${mobileMenu ? "sidebar-open" : ""}`}
-      >
+      <aside className={`sidebar ${mobileMenu ? "sidebar-open" : ""}`}>
 
         {/* BRAND */}
 
@@ -499,14 +496,12 @@ function App() {
 
             const selected =
               activePage === item.name &&
-              !activeSubject;
+              (item.name !== "Subjects" || !activeSubject);
 
             return (
               <button
                 key={item.name}
-                className={`nav-item ${
-                  selected ? "nav-active" : ""
-                }`}
+                className={`nav-item ${selected ? "nav-active" : ""}`}
                 onClick={() => goToPage(item.name)}
               >
                 <Icon size={18} strokeWidth={1.7} />
@@ -601,7 +596,6 @@ function App() {
               aria-label="Notifications"
             >
               <Bell size={19} />
-
               <span className="notification-dot" />
             </button>
 
@@ -635,8 +629,6 @@ function App() {
           {activePage === "Dashboard" && !activeSubject && (
 
             <>
-
-              {/* WELCOME SECTION */}
 
               <section className="welcome-section">
 
@@ -680,7 +672,6 @@ function App() {
                     />
 
                     <span>THE MATRIC</span>
-
                     <strong>INSTITUTE</strong>
 
                     <small>
@@ -954,11 +945,8 @@ function App() {
                   >
 
                     <div className="library-card-top">
-
                       <span>{subject.code}</span>
-
                       <ArrowUpRight size={17} />
-
                     </div>
 
                     <span className="subject-category">
@@ -970,11 +958,8 @@ function App() {
                     <p>{subject.description}</p>
 
                     <div className="library-card-bottom">
-
                       <span>Explore subject</span>
-
                       <ChevronRight size={16} />
-
                     </div>
 
                   </button>
@@ -982,8 +967,6 @@ function App() {
                 ))}
 
               </div>
-
-              {/* EMPTY SEARCH STATE */}
 
               {filteredSubjects.length === 0 && (
 
@@ -1026,8 +1009,6 @@ function App() {
 
               {mySubjects.length === 0 ? (
 
-                /* EMPTY STATE */
-
                 <div className="empty-state">
 
                   <Bookmark
@@ -1054,8 +1035,6 @@ function App() {
 
               ) : (
 
-                /* SELECTED SUBJECT CARDS */
-
                 <div className="subject-grid">
 
                   {subjects
@@ -1071,11 +1050,8 @@ function App() {
                       >
 
                         <div className="library-card-top">
-
                           <span>{subject.code}</span>
-
                           <ArrowUpRight size={17} />
-
                         </div>
 
                         <span className="subject-category">
@@ -1087,11 +1063,8 @@ function App() {
                         <p>{subject.description}</p>
 
                         <div className="library-card-bottom">
-
                           <span>Open subject</span>
-
                           <ChevronRight size={16} />
-
                         </div>
 
                       </button>
@@ -1107,12 +1080,33 @@ function App() {
           )}
 
           {/* ======================================
-              4. INDIVIDUAL SUBJECT DASHBOARD
+              4. PAST PAPERS LIBRARY
           ====================================== */}
 
-          {activePage === "Subjects" &&
-            activeSubject &&
-            currentSubject && (
+          {activePage === "Past Papers" && (
+
+            <PastPapers
+              subjectOptions={subjects.map((subject) => subject.name)}
+              initialSubject={activeSubject ?? undefined}
+              onBack={() => {
+                if (activeSubject) {
+                  setActivePage("Subjects");
+                } else {
+                  goToPage("Subjects");
+                }
+              }}
+            />
+
+          )}
+
+          {/* ======================================
+              5. INDIVIDUAL SUBJECT DASHBOARD
+          ====================================== */}
+
+          {activeSubject &&
+            currentSubject &&
+            activePage !== "Subjects" &&
+            activePage !== "Past Papers" && (
 
             <section className="subject-detail">
 
@@ -1129,13 +1123,9 @@ function App() {
               <div className="subject-hero">
 
                 <span className="eyebrow">
-
                   {currentSubject.category.toUpperCase()}
-
                   {" · "}
-
                   {currentSubject.code}
-
                 </span>
 
                 <h1>{currentSubject.name}</h1>
@@ -1164,13 +1154,11 @@ function App() {
                     toggleMySubject(currentSubject.name)
                   }
                 >
-
                   {mySubjects.includes(currentSubject.name)
                     ? "Remove from My Subjects"
                     : "Add to My Subjects"}
 
                   <ArrowUpRight size={17} />
-
                 </button>
 
               </div>
@@ -1241,12 +1229,13 @@ function App() {
           )}
 
           {/* ======================================
-              5. SUBJECT-SPECIFIC SECTIONS
+              6. SUBJECT-SPECIFIC SECTIONS
           ====================================== */}
 
           {activeSubject &&
             currentSubject &&
-            activePage !== "Subjects" && (
+            activePage !== "Subjects" &&
+            activePage !== "Past Papers" && (
 
             <section className="placeholder-page">
 
@@ -1255,9 +1244,7 @@ function App() {
                 onClick={() => setActivePage("Subjects")}
               >
                 <ChevronLeft size={17} />
-
                 Back to {currentSubject.name}
-
               </button>
 
               <span className="eyebrow">
@@ -1267,8 +1254,8 @@ function App() {
               <h1>{activePage}</h1>
 
               <p>
-                This section is being prepared for
-                {" "}{currentSubject.name}.
+                This section is being prepared for{" "}
+                {currentSubject.name}.
                 Your academic resources will appear here.
               </p>
 
@@ -1285,13 +1272,14 @@ function App() {
           )}
 
           {/* ======================================
-              6. GENERAL NAVIGATION PAGES
+              7. GENERAL NAVIGATION PAGES
           ====================================== */}
 
           {!activeSubject &&
             activePage !== "Dashboard" &&
             activePage !== "Subjects" &&
-            activePage !== "My Subjects" && (
+            activePage !== "My Subjects" &&
+            activePage !== "Past Papers" && (
 
             <section className="placeholder-page">
 
