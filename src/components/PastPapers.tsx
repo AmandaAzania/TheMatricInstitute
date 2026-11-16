@@ -43,8 +43,12 @@ const subjectAliases: Record<string, string> = {
   "isiNdebele FAL": "IsiNdebele First Additional Language",
 };
 
-export default function PastPapers({ subjectOptions, initialSubject }: PastPapersProps) {
-  const [subject, setSubject] = useState(initialSubject || "All Subjects");
+function displayKind(kind: string): string {
+  return /marking guidelines|memorandum|^memo$/i.test(kind) ? "Memorandum" : kind;
+}
+
+export default function PastPapers({ initialSubject }: PastPapersProps) {
+  const [subject, setSubject] = useState(subjectAliases[initialSubject || ""] || initialSubject || "All Subjects");
   const [year, setYear] = useState("All Years");
   const [localPapers, setLocalPapers] = useState<PaperResource[]>([]);
   const [preview, setPreview] = useState<PaperResource | null>(null);
@@ -71,10 +75,15 @@ export default function PastPapers({ subjectOptions, initialSubject }: PastPaper
   }, []);
 
   const allPapers = useMemo(() => [...suppliedDocuments, ...localPapers], [localPapers]);
-  const subjects = useMemo(() => Array.from(new Set([
-    ...subjectOptions.map((item) => subjectAliases[item] || item),
-    ...allPapers.map((paper) => paper.subject),
-  ])).sort((a, b) => a.localeCompare(b)), [subjectOptions, allPapers]);
+  const subjects = useMemo(() => Array.from(new Set(
+    allPapers.map((paper) => paper.subject)
+  )).sort((a, b) => a.localeCompare(b)), [allPapers]);
+
+  useEffect(() => {
+    if (subject !== "All Subjects" && !subjects.includes(subject)) {
+      setSubject("All Subjects");
+    }
+  }, [subject, subjects]);
   const years = useMemo(() => Array.from(new Set(allPapers.map((paper) => paper.year))).sort((a, b) => Number(b) - Number(a)), [allPapers]);
   const filteredPapers = useMemo(() => allPapers.filter((paper) =>
     (subject === "All Subjects" || paper.subject === subject) &&
@@ -118,9 +127,10 @@ export default function PastPapers({ subjectOptions, initialSubject }: PastPaper
                 <div className="exam-paper-source">
                   <div className="exam-paper-source-mark">
                      <img
-                       src="https://commons.wikimedia.org/wiki/Special:Redirect/file/Coat_of_arms_of_South_Africa_(heraldic).svg"
+                       src="/images/sa-coat-of-arms.png"
                        alt="South African national Coat of Arms"
-                       loading="lazy"
+                       loading="eager"
+                       decoding="async"
                        onError={(event) => {
                          event.currentTarget.style.display = "none";
                          event.currentTarget.parentElement?.classList.add("exam-paper-emblem-unavailable");
@@ -133,7 +143,7 @@ export default function PastPapers({ subjectOptions, initialSubject }: PastPaper
                 <div className="exam-paper-grey-panel">
                   <strong>{paper.subject.toUpperCase()}{paper.language ? ` · ${paper.language.toUpperCase()}` : ""}</strong>
                   <span>{paper.paper.toUpperCase()} · {paper.session.toUpperCase()} {paper.year}{paper.province ? ` · ${paper.province.toUpperCase()}` : ""}</span>
-                  {paper.kind !== "Question Paper" && <span>{paper.kind.toUpperCase()}</span>}
+                  {paper.kind !== "Question Paper" && <span>{displayKind(paper.kind).toUpperCase()}</span>}
                 </div>
                 <div className="exam-paper-sheet-footer">
                   <span>{paper.marks ? `MARKS: ${paper.marks}` : "NSC EXAMINATION RESOURCE"}</span>
@@ -141,7 +151,7 @@ export default function PastPapers({ subjectOptions, initialSubject }: PastPaper
                 </div>
               </div>
               <div className="exam-paper-card-body">
-                <div className="exam-paper-tags"><span>{paper.kind}</span></div>
+                <div className="exam-paper-tags"><span>{displayKind(paper.kind)}</span></div>
                 <h2>{paper.subject}</h2>
                 <p className="exam-paper-session">{paper.paper} · {paper.session} {paper.year}{paper.province ? ` · ${paper.province}` : ""}</p>
                 <p className="exam-paper-filename" title={paper.fileName}><FileText size={14} /> {paper.fileName}</p>
@@ -163,7 +173,7 @@ export default function PastPapers({ subjectOptions, initialSubject }: PastPaper
         <div className="exam-library-overlay" onMouseDown={(event) => { if (event.target === event.currentTarget) setPreview(null); }}>
           <section className="exam-library-modal" role="dialog" aria-modal="true" aria-label={`Preview ${preview.fileName}`}>
             <div className="exam-library-modal-header">
-              <div><h2>{preview.subject} · {preview.paper}</h2><p>{preview.kind} · {preview.session} {preview.year}</p></div>
+              <div><h2>{preview.subject} · {preview.paper}</h2><p>{displayKind(preview.kind)} · {preview.session} {preview.year}</p></div>
               <div className="exam-library-modal-actions"><a href={preview.url} download={preview.fileName}><ArrowDownToLine size={17} /> Download</a><button type="button" onClick={() => setPreview(null)} aria-label="Close preview"><X size={21} /></button></div>
             </div>
             <iframe title={`PDF preview of ${preview.fileName}`} src={preview.url || ""} />

@@ -1,19 +1,4 @@
-
-export type PaperResource = {
-  id: string;
-  subject: string;
-  year: string;
-  session: string;
-  paper: string;
-  kind: string;
-  fileName: string;
-  origin: "dbe" | "local";
-  province?: string;
-  language?: string;
-  url?: string;
-  marks?: number;
-  duration?: string;
-};
+export type PaperResource = { id: string; subject: string; year: string; session: string; paper: string; kind: string; fileName: string; origin: "dbe" | "local"; province?: string; language?: string; url?: string; marks?: number; duration?: string; };
 
 export const paperCatalog: PaperResource[] = [
   {
@@ -22,7 +7,7 @@ export const paperCatalog: PaperResource[] = [
     "year": "2026",
     "session": "May/June",
     "paper": "Paper 2",
-    "kind": "Marking Guidelines",
+    "kind": "Memorandum",
     "fileName": "Accounting P2 May-Jun 2026 MG Afr.pdf",
     "origin": "dbe",
     "language": "Afrikaans"
@@ -44,7 +29,7 @@ export const paperCatalog: PaperResource[] = [
     "year": "2025",
     "session": "November",
     "paper": "Paper 2",
-    "kind": "Marking Guidelines",
+    "kind": "Memorandum",
     "fileName": "Accounting P2 Nov 2025 MG Eng.pdf",
     "origin": "dbe",
     "language": "English"
@@ -55,7 +40,7 @@ export const paperCatalog: PaperResource[] = [
     "year": "2025",
     "session": "November",
     "paper": "Paper 1",
-    "kind": "Marking Guidelines",
+    "kind": "Memorandum",
     "fileName": "Afrikaans FAL P1 Nov 2025 MG.pdf",
     "origin": "dbe"
   },
@@ -75,7 +60,7 @@ export const paperCatalog: PaperResource[] = [
     "year": "2025",
     "session": "November",
     "paper": "Paper 2",
-    "kind": "Marking Guidelines",
+    "kind": "Memorandum",
     "fileName": "Afrikaans FAL P2 Nov 2025 MG.pdf",
     "origin": "dbe"
   },
@@ -95,7 +80,7 @@ export const paperCatalog: PaperResource[] = [
     "year": "2025",
     "session": "November",
     "paper": "Paper 3",
-    "kind": "Marking Guidelines",
+    "kind": "Memorandum",
     "fileName": "Afrikaans FAL P3 Nov 2025 MG.pdf",
     "origin": "dbe"
   },
@@ -115,7 +100,7 @@ export const paperCatalog: PaperResource[] = [
     "year": "2025",
     "session": "November",
     "paper": "Paper 1",
-    "kind": "Marking Guidelines",
+    "kind": "Memorandum",
     "fileName": "Afrikaans HL P1 Nov 2025 MG.pdf",
     "origin": "dbe"
   },
@@ -135,7 +120,7 @@ export const paperCatalog: PaperResource[] = [
     "year": "2025",
     "session": "November",
     "paper": "Paper 2",
-    "kind": "Marking Guidelines",
+    "kind": "Memorandum",
     "fileName": "Afrikaans HL P2 Nov 2025 MG.pdf",
     "origin": "dbe"
   },
@@ -230,7 +215,7 @@ export const paperCatalog: PaperResource[] = [
     "year": "2025",
     "session": "November",
     "paper": "Paper 2",
-    "kind": "Marking Guidelines",
+    "kind": "Memorandum",
     "fileName": "Afrikaans SAL P2 Nov 2025 MG Eastern Cape(1).pdf",
     "origin": "dbe",
     "province": "Eastern Cape"
@@ -241,7 +226,7 @@ export const paperCatalog: PaperResource[] = [
     "year": "2025",
     "session": "November",
     "paper": "Paper 2",
-    "kind": "Marking Guidelines",
+    "kind": "Memorandum",
     "fileName": "Afrikaans SAL P2 Nov 2025 MG Free State.pdf",
     "origin": "dbe",
     "province": "Free State"
@@ -252,7 +237,7 @@ export const paperCatalog: PaperResource[] = [
     "year": "2025",
     "session": "November",
     "paper": "Paper 2",
-    "kind": "Marking Guidelines",
+    "kind": "Memorandum",
     "fileName": "Afrikaans SAL P2 Nov 2025 MG Gauteng.pdf",
     "origin": "dbe",
     "province": "Gauteng"
@@ -373,7 +358,7 @@ export const paperCatalog: PaperResource[] = [
     "year": "2025",
     "session": "November",
     "paper": "General Paper",
-    "kind": "Marking Guidelines",
+    "kind": "Memorandum",
     "fileName": "Dramatic Arts Nov 2025 MG Eng.pdf",
     "origin": "dbe",
     "language": "English"
@@ -406,7 +391,7 @@ export const paperCatalog: PaperResource[] = [
     "year": "2026",
     "session": "May/June",
     "paper": "General Paper",
-    "kind": "Marking Guidelines",
+    "kind": "Memorandum",
     "fileName": "Electrical Technology May-June 2026 (Digital) MG Eng.pdf",
     "origin": "dbe",
     "language": "English"
@@ -428,7 +413,7 @@ export const paperCatalog: PaperResource[] = [
     "year": "2025",
     "session": "November",
     "paper": "General Paper",
-    "kind": "Marking Guidelines",
+    "kind": "Memorandum",
     "fileName": "Electrical Technology Nov 2025 (Electronics) MG Eng.pdf",
     "origin": "dbe",
     "language": "English"
@@ -449,7 +434,7 @@ export const paperCatalog: PaperResource[] = [
     "year": "2025",
     "session": "November",
     "paper": "Paper 1",
-    "kind": "Marking Guidelines",
+    "kind": "Memorandum",
     "fileName": "English FAL P1 Nov 2025 MG (1).pdf",
     "origin": "dbe"
   },
@@ -459,7 +444,7 @@ export const paperCatalog: PaperResource[] = [
     "year": "2026",
     "session": "May/June",
     "paper": "Paper 2",
-    "kind": "Marking Guidelines",
+    "kind": "Memorandum",
     "fileName": "English FAL P2 May-June 2026 MG.pdf",
     "origin": "dbe"
   },
@@ -489,7 +474,7 @@ export const paperCatalog: PaperResource[] = [
     "year": "2025",
     "session": "November",
     "paper": "Paper 3",
-    "kind": "Marking Guidelines",
+    "kind": "Memorandum",
     "fileName": "English FAL P3 Nov 2025 MG.pdf",
     "origin": "dbe"
   },
@@ -499,7 +484,7 @@ export const paperCatalog: PaperResource[] = [
     "year": "2025",
     "session": "November",
     "paper": "Paper 1",
-    "kind": "Marking Guidelines",
+    "kind": "Memorandum",
     "fileName": "English HL P1 Nov 2025 MG.pdf",
     "origin": "dbe"
   },
@@ -509,7 +494,7 @@ export const paperCatalog: PaperResource[] = [
     "year": "2025",
     "session": "November",
     "paper": "Paper 1",
-    "kind": "Marking Guidelines",
+    "kind": "Memorandum",
     "fileName": "English SAL P1 Nov 2025 MG.pdf",
     "origin": "dbe"
   },
@@ -519,7 +504,7 @@ export const paperCatalog: PaperResource[] = [
     "year": "2025",
     "session": "November",
     "paper": "Paper 3",
-    "kind": "Marking Guidelines",
+    "kind": "Memorandum",
     "fileName": "English SAL P3 Nov 2025 MG.pdf",
     "origin": "dbe"
   },
@@ -571,7 +556,7 @@ export const paperCatalog: PaperResource[] = [
     "year": "2026",
     "session": "May/June",
     "paper": "Paper 1",
-    "kind": "Marking Guidelines",
+    "kind": "Memorandum",
     "fileName": "IsiXhosa FAL P1 May-June 2026 MG.pdf",
     "origin": "dbe"
   },
@@ -581,7 +566,7 @@ export const paperCatalog: PaperResource[] = [
     "year": "2025",
     "session": "November",
     "paper": "Paper 1",
-    "kind": "Marking Guidelines",
+    "kind": "Memorandum",
     "fileName": "IsiXhosa FAL P1 Nov 2025 MG.pdf",
     "origin": "dbe"
   },
@@ -621,7 +606,7 @@ export const paperCatalog: PaperResource[] = [
     "year": "2025",
     "session": "November",
     "paper": "Paper 3",
-    "kind": "Marking Guidelines",
+    "kind": "Memorandum",
     "fileName": "IsiXhosa SAL P3 Nov 2025 MG.pdf",
     "origin": "dbe"
   },
@@ -631,7 +616,7 @@ export const paperCatalog: PaperResource[] = [
     "year": "2025",
     "session": "November",
     "paper": "Paper 1",
-    "kind": "Marking Guidelines",
+    "kind": "Memorandum",
     "fileName": "IsiZulu FAL P1 Nov 2025 MG.pdf",
     "origin": "dbe"
   },
@@ -651,7 +636,7 @@ export const paperCatalog: PaperResource[] = [
     "year": "2026",
     "session": "May/June",
     "paper": "Paper 2",
-    "kind": "Marking Guidelines",
+    "kind": "Memorandum",
     "fileName": "IsiZulu FAL P2 May-June 2026 MG.pdf",
     "origin": "dbe"
   },
@@ -671,7 +656,7 @@ export const paperCatalog: PaperResource[] = [
     "year": "2025",
     "session": "November",
     "paper": "Paper 3",
-    "kind": "Marking Guidelines",
+    "kind": "Memorandum",
     "fileName": "IsiZulu SAL P3 Nov 2025 MG.pdf",
     "origin": "dbe"
   },
@@ -681,7 +666,7 @@ export const paperCatalog: PaperResource[] = [
     "year": "2025",
     "session": "September",
     "paper": "General Paper",
-    "kind": "Marking Guidelines",
+    "kind": "Memorandum",
     "fileName": "Life Orientation September 2025 MG Afr.pdf",
     "origin": "dbe",
     "language": "Afrikaans"
@@ -692,7 +677,7 @@ export const paperCatalog: PaperResource[] = [
     "year": "2026",
     "session": "May/June",
     "paper": "Paper 1",
-    "kind": "Marking Guidelines",
+    "kind": "Memorandum",
     "fileName": "English FAL P1 May-June 2026 MG.pdf",
     "origin": "dbe"
   }
