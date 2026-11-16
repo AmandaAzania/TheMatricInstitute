@@ -23,11 +23,17 @@ import {
   Bookmark,
   FileText,
   Sparkles,
-  BarChart3,
   House,
+  Plus,
+  Check,
+  Send,
+  Lightbulb,
+  PenLine,
+  Target,
 } from "lucide-react";
 
 import "./App.css";
+import "./Curriculum.css";
 
 // ==========================================
 // SUBJECT DIRECTORY
@@ -419,7 +425,7 @@ function App() {
       icon: BookOpen,
     },
     {
-      name: "My Subjects",
+      name: "My Curriculum",
       icon: Bookmark,
     },
     {
@@ -433,10 +439,6 @@ function App() {
     {
       name: "Practice Exams",
       icon: ClipboardCheck,
-    },
-    {
-      name: "My Progress",
-      icon: BarChart3,
     },
   ];
 
@@ -652,7 +654,7 @@ function App() {
 
                   <button
                     className="primary-button"
-                    onClick={() => goToPage("Subjects")}
+                    onClick={() => goToPage("My Curriculum")}
                   >
                     Explore your subjects
                     <ArrowUpRight size={17} />
@@ -787,9 +789,9 @@ function App() {
 
                   <button
                     className="text-link"
-                    onClick={() => goToPage("Subjects")}
+                    onClick={() => goToPage("My Curriculum")}
                   >
-                    View all subjects
+                    View my curriculum
                     <ArrowUpRight size={16} />
                   </button>
 
@@ -802,7 +804,8 @@ function App() {
                     <button
                       className="featured-subject"
                       key={subject.code}
-                      onClick={() => openSubject(subject.name)}
+                      onClick={() => toggleMySubject(subject.name)}
+                      aria-pressed={mySubjects.includes(subject.name)}
                     >
 
                       <span className="subject-number">
@@ -821,8 +824,8 @@ function App() {
                       <h3>{subject.name}</h3>
 
                       <span className="subject-arrow">
-                        Explore subject
-                        <ArrowUpRight size={15} />
+                        {mySubjects.includes(subject.name) ? "Added to curriculum" : "Add subject"}
+                        {mySubjects.includes(subject.name) ? <Check size={15} /> : <Plus size={15} />}
                       </span>
 
                     </button>
@@ -937,33 +940,33 @@ function App() {
               <div className="subject-grid">
 
                 {filteredSubjects.map((subject) => (
-
-                  <button
-                    className="library-card"
-                    key={subject.code}
-                    onClick={() => openSubject(subject.name)}
-                  >
-
+                  <article className="library-card curriculum-catalogue-card" key={subject.code}>
                     <div className="library-card-top">
                       <span>{subject.code}</span>
-                      <ArrowUpRight size={17} />
+                      <BookOpen size={17} />
                     </div>
-
-                    <span className="subject-category">
-                      {subject.category}
-                    </span>
-
+                    <span className="subject-category">{subject.category}</span>
                     <h3>{subject.name}</h3>
-
                     <p>{subject.description}</p>
-
-                    <div className="library-card-bottom">
-                      <span>Explore subject</span>
-                      <ChevronRight size={16} />
+                    <div className="catalogue-actions">
+                      <button
+                        type="button"
+                        className="curriculum-add-button"
+                        onClick={() => toggleMySubject(subject.name)}
+                        aria-pressed={mySubjects.includes(subject.name)}
+                      >
+                        {mySubjects.includes(subject.name) ? <Check size={16} /> : <Plus size={16} />}
+                        {mySubjects.includes(subject.name) ? "Added — remove" : "Add subject"}
+                      </button>
+                      <button
+                        type="button"
+                        className="curriculum-open-button"
+                        onClick={() => openSubject(subject.name)}
+                      >
+                        View details <ArrowUpRight size={15} />
+                      </button>
                     </div>
-
-                  </button>
-
+                  </article>
                 ))}
 
               </div>
@@ -984,7 +987,7 @@ function App() {
               3. MY SUBJECTS
           ====================================== */}
 
-          {activePage === "My Subjects" && !activeSubject && (
+          {activePage === "My Curriculum" && !activeSubject && (
 
             <section className="section-block subject-library">
 
@@ -996,15 +999,22 @@ function App() {
                     YOUR ACADEMIC PROGRAMME
                   </span>
 
-                  <h1>My selected subjects.</h1>
+                  <h1>My Curriculum.</h1>
 
                   <p>
-                    Your personal collection of subjects.
-                    Continue exploring and building your academic programme.
+                    All your selected subjects in one place.
+                    Choose a subject to access its learning resources.
                   </p>
 
                 </div>
 
+              </div>
+
+              <div className="curriculum-toolbar">
+                <span>{mySubjects.length} {mySubjects.length === 1 ? "subject" : "subjects"} selected</span>
+                <button type="button" className="primary-button" onClick={() => goToPage("Subjects")}>
+                  <Plus size={17} /> Add subject
+                </button>
               </div>
 
               {mySubjects.length === 0 ? (
@@ -1038,37 +1048,25 @@ function App() {
                 <div className="subject-grid">
 
                   {subjects
-                    .filter((subject) =>
-                      mySubjects.includes(subject.name)
-                    )
+                    .filter((subject) => mySubjects.includes(subject.name))
                     .map((subject) => (
-
-                      <button
-                        className="library-card"
-                        key={subject.code}
-                        onClick={() => openSubject(subject.name)}
-                      >
-
+                      <article className="library-card curriculum-selected-card" key={subject.code}>
                         <div className="library-card-top">
                           <span>{subject.code}</span>
-                          <ArrowUpRight size={17} />
+                          <BookMarked size={18} />
                         </div>
-
-                        <span className="subject-category">
-                          {subject.category}
-                        </span>
-
+                        <span className="subject-category">{subject.category}</span>
                         <h3>{subject.name}</h3>
-
                         <p>{subject.description}</p>
-
-                        <div className="library-card-bottom">
-                          <span>Open subject</span>
-                          <ChevronRight size={16} />
+                        <div className="catalogue-actions">
+                          <button type="button" className="curriculum-add-button" onClick={() => openSubject(subject.name)}>
+                            Open subject <ArrowUpRight size={15} />
+                          </button>
+                          <button type="button" className="curriculum-remove-button" onClick={() => toggleMySubject(subject.name)}>
+                            Remove
+                          </button>
                         </div>
-
-                      </button>
-
+                      </article>
                     ))}
 
                 </div>
@@ -1077,6 +1075,60 @@ function App() {
 
             </section>
 
+          )}
+
+          {/* ======================================
+              AI CLASSROOM — INTERFACE PREVIEW
+          ====================================== */}
+
+          {activePage === "AI Classroom" && (
+            <section className="ai-classroom-page">
+              <div className="ai-classroom-heading">
+                <div>
+                  <span className="eyebrow">A NEW WAY TO LEARN</span>
+                  <h1>AI Classroom<span className="ai-heading-period">.</span></h1>
+                  <p>Learn at your own pace, ask questions, and prepare with confidence.</p>
+                </div>
+                <span className="ai-coming-soon">COMING SOON</span>
+              </div>
+
+              <div className="ai-classroom-layout">
+                <div className="ai-main-panel">
+                  <div className="ai-tutor-header">
+                    <span className="ai-tutor-icon"><GraduationCap size={24} /></span>
+                    <div>
+                      <strong>Your academic tutor</strong>
+                      <small>THE MATRIC INSTITUTE · AI LEARNING</small>
+                    </div>
+                  </div>
+                  <div className="ai-welcome-message">
+                    <span className="eyebrow">WELCOME TO YOUR CLASSROOM</span>
+                    <h2>What would you like to learn today?</h2>
+                    <p>Your future AI tutor will help explain concepts, guide you through practice questions and prepare you for your matric examinations.</p>
+                  </div>
+                  <div className="ai-prompts">
+                    <div><Lightbulb size={19} /><span>Explain a topic</span></div>
+                    <div><PenLine size={19} /><span>Practice questions</span></div>
+                    <div><Target size={19} /><span>Exam preparation</span></div>
+                    <div><BookOpen size={19} /><span>Study support</span></div>
+                  </div>
+                  <div className="ai-message-composer">
+                    <input aria-label="Ask your AI tutor" placeholder="Ask your AI tutor a question..." disabled />
+                    <button type="button" aria-label="Send message (coming soon)" disabled><Send size={19} /></button>
+                  </div>
+                  <p className="ai-disclaimer">Classroom preview only. AI tutoring is not yet active.</p>
+                </div>
+                <aside className="ai-side-panel">
+                  <span className="eyebrow">YOUR LEARNING SPACE</span>
+                  <h3>Study with purpose.</h3>
+                  <p>When the classroom launches, you will be able to learn alongside your selected subjects.</p>
+                  <div className="ai-side-rule" />
+                  <strong>MY CURRICULUM</strong>
+                  <span>{mySubjects.length} selected {mySubjects.length === 1 ? "subject" : "subjects"}</span>
+                  <button type="button" onClick={() => goToPage("My Curriculum")}>View my curriculum <ArrowUpRight size={15} /></button>
+                </aside>
+              </div>
+            </section>
           )}
 
           {/* ======================================
@@ -1105,8 +1157,7 @@ function App() {
 
           {activeSubject &&
             currentSubject &&
-            activePage !== "Subjects" &&
-            activePage !== "Past Papers" && (
+            activePage === "Subjects" && (
 
             <section className="subject-detail">
 
@@ -1194,9 +1245,7 @@ function App() {
                     <button
                       className="feature-card"
                       key={feature.title}
-                      onClick={() =>
-                        setActivePage(feature.title)
-                      }
+                      onClick={() => setActivePage(feature.title)}
                     >
 
                       <span className="feature-icon">
@@ -1235,7 +1284,10 @@ function App() {
           {activeSubject &&
             currentSubject &&
             activePage !== "Subjects" &&
-            activePage !== "Past Papers" && (
+            activePage !== "Past Papers" &&
+            activePage !== "Dashboard" &&
+            activePage !== "My Curriculum" &&
+            activePage !== "AI Classroom" && (
 
             <section className="placeholder-page">
 
