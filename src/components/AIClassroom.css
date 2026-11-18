@@ -28,3 +28,11 @@
 .ai-professor-footnote{display:flex;align-items:flex-start;gap:9px;margin-top:36px;color:#c5cbd3;font-size:11px;line-height:1.7}
 .ai-professor-footnote svg{flex-shrink:0;color:#d4b77e}
 @media(max-width:620px){.ai-tutor-header{flex-wrap:wrap}.ai-voice-controls{width:100%}.ai-chat-history{padding:17px 14px}.ai-chat-message{max-width:95%}.ai-suggestion-section{padding:0 14px 15px}}
+
+.ai-topic-picker{padding:17px 25px 10px;border-bottom:1px solid #eee9e2}
+.ai-topic-picker>span{display:block;font-size:10px;font-weight:800;letter-spacing:1.2px;color:#8b7d73;margin-bottom:11px}
+.ai-topic-picker>div{display:flex;flex-wrap:wrap;gap:8px}
+.ai-topic-picker button{border:1px solid #e0d6ca;background:#fff;color:#5a4750;padding:9px 12px;border-radius:999px;cursor:pointer;font-size:12px}
+.ai-topic-picker button.ai-topic-selected{background:#641f32;color:#fff;border-color:#641f32}
+.ai-chat-message p{white-space:pre-wrap}
+@media(max-width:560px){.ai-topic-picker{padding:15px 14px}}

@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { ArrowUpRight, BookOpen, GraduationCap, Lightbulb, Mic, MicOff, Send, Sparkles, Square, Volume2, VolumeX, WandSparkles } from "lucide-react";
 import "./AIClassroom.css";
+import { initialSession, replyToLearner, type TutorTopic } from "./tutorEngine";
 
 type Props = { selectedSubjects: string[]; onOpenCurriculum: () => void };
 type Message = { role: "tutor" | "student"; text: string };
@@ -20,33 +21,15 @@ type SpeechWindow = Window & {
   webkitSpeechRecognition?: RecognitionConstructor;
 };
 
-const welcome = "Welcome to your classroom! I'm Professor Dumbledore, your fictional study guide. Choose a topic or ask me a question. I can offer short revision tips, and I can read my answers aloud.";
-const suggestions = [
-  "Help me make a study plan",
-  "How do I prepare for exams?",
-  "Explain algebra basics",
-  "How do I write a good essay?",
-];
-
-function respond(question: string, subjects: string[]): string {
-  const q = question.toLowerCase();
-  if (/\b(hello|hi|hey|good morning)\b/.test(q)) return "Welcome, learner! What would you like to work on today? Try algebra, exam preparation, essay writing, or a study plan.";
-  if (/algebra|equation|variable|mathematics|maths/.test(q)) return "Algebra starts with finding an unknown value. For example, if x + 3 = 8, subtract 3 from both sides to find x = 5. Try this: x + 6 = 14. What is x?";
-  if (/essay|english|literature|paragraph/.test(q)) return "A strong essay begins with a clear argument. Use an introduction, body paragraphs with evidence and explanation, and a conclusion. For each body paragraph, try Point, Evidence, Explain, Link.";
-  if (/science|physics|chemistry/.test(q)) return "In science, start by identifying what you know, what you need to find, and the units involved. Draw a simple diagram where helpful, then select the appropriate formula or principle.";
-  if (/study plan|timetable|schedule|routine/.test(q)) {
-    const chosen = subjects.length ? subjects.slice(0, 3).join(", ") : "your most challenging subjects";
-    return `Here's a starter plan: choose a 25-minute focus session for ${chosen}, take a short break, then spend 15 minutes recalling what you learned without notes. Rotate subjects across the week.`;
-  }
-  if (/exam|test|past paper|revision|memorandum/.test(q)) return "For exam preparation, start with a past paper, try questions without looking at the memo, then mark your work and record the topics you need to revisit. Repeat those topics before trying another paper.";
-  if (/motivat|nervous|stress|worried|confidence/.test(q)) return "Progress comes from consistent, manageable steps. Choose one topic, practise a few questions, and review what you understand. You do not need to master everything in one session.";
-  if (/^8$|x\s*=\s*8|answer is 8/.test(q)) return "Correct! For x + 6 = 14, subtract 6 from both sides, so x = 8. Well done.";
-  return "That's a thoughtful question. I'm currently a guided classroom demo, so I can't reliably answer every subject question yet. Try asking about algebra, essay writing, study plans, or exam preparation. Full AI tutoring is coming later.";
-}
+const welcome = "Welcome! I'm Professor Dumbledore, your fictional study guide. Choose a subject below, ask me for an explanation, or type 'quiz' to start practising. I can offer hints and check your answers.";
+const suggestions = ["quiz", "hint", "Help me make a study plan", "Explain algebra", "How do I prepare for exams?"];
+const topics: TutorTopic[] = ["Mathematics", "English", "Science", "Exam Skills"];
 
 export default function AIClassroom({ selectedSubjects, onOpenCurriculum }: Props) {
   const [messages, setMessages] = useState<Message[]>([{ role: "tutor", text: welcome }]);
   const [draft, setDraft] = useState("");
+  const [topic, setTopic] = useState<TutorTopic>("Mathematics");
+  const sessionRef = useRef(initialSession());
   const [voiceEnabled, setVoiceEnabled] = useState(false);
   const [speaking, setSpeaking] = useState(false);
   const [listening, setListening] = useState(false);
@@ -84,10 +67,21 @@ export default function AIClassroom({ selectedSubjects, onOpenCurriculum }: Prop
   const send = (value = draft) => {
     const question = value.trim();
     if (!question) return;
-    const answer = respond(question, selectedSubjects);
+    const result = replyToLearner(question, sessionRef.current, selectedSubjects);
+    sessionRef.current = result.session;
+    setTopic(result.session.topic);
+    const answer = result.text;
     setMessages(current => [...current, { role: "student", text: question }, { role: "tutor", text: answer }]);
     setDraft("");
     if (voiceRef.current) speak(answer);
+  };
+
+  const chooseTopic = (nextTopic: TutorTopic) => {
+    const result = replyToLearner(nextTopic, sessionRef.current, selectedSubjects);
+    sessionRef.current = result.session;
+    setTopic(result.session.topic);
+    setMessages(current => [...current, { role: "tutor", text: result.text }]);
+    if (voiceRef.current) speak(result.text);
   };
 
   const toggleVoice = () => {
@@ -128,7 +122,7 @@ export default function AIClassroom({ selectedSubjects, onOpenCurriculum }: Prop
         <div>
           <span className="eyebrow">THE MATRIC INSTITUTE · INTERACTIVE LEARNING</span>
           <h1>AI Classroom<span className="ai-heading-period">.</span></h1>
-          <p>Meet your storybook-inspired study guide. Ask a question, hear a response and practise at your own pace.</p>
+          <p>Choose a topic, practise with guided questions, get hints, and hear your professor speak.</p>
         </div>
         <span className="ai-coming-soon">GUIDED DEMO</span>
       </div>
@@ -148,7 +142,11 @@ export default function AIClassroom({ selectedSubjects, onOpenCurriculum }: Prop
               {speaking && <button type="button" onClick={() => { window.speechSynthesis.cancel(); setSpeaking(false); }} aria-label="Stop speaking"><Square size={15}/> Stop</button>}
             </div>
           </div>
-          <div className="ai-demo-notice"><WandSparkles size={16}/><span>Interactive preview: responses are prewritten learning tips, not generated by a live AI model. Voice uses your browser's synthetic speech.</span></div>
+          <div className="ai-demo-notice"><WandSparkles size={16}/><span>Interactive guided tutor: quizzes, hints and explanations run locally in your browser. This is not a live generative AI model.</span></div>
+          <div className="ai-topic-picker" aria-label="Choose a learning topic">
+            <span>YOUR CURRENT TOPIC</span>
+            <div>{topics.map(item => <button type="button" key={item} className={topic === item ? "ai-topic-selected" : ""} onClick={() => chooseTopic(item)} aria-pressed={topic === item}>{item}</button>)}</div>
+          </div>
           <div className="ai-chat-history" ref={scrollRef} role="log" aria-label="Classroom conversation" aria-live="polite">
             {messages.map((message, i) => (
               <div className={`ai-chat-message ai-chat-${message.role}`} key={i}>
@@ -176,8 +174,8 @@ export default function AIClassroom({ selectedSubjects, onOpenCurriculum }: Prop
         </div>
         <aside className="ai-side-panel">
           <span className="eyebrow">YOUR LEARNING SPACE</span>
-          <h3>A little curiosity goes a long way.</h3>
-          <p>Choose a subject, explore a topic, and practise with short guided responses.</p>
+          <h3>Practise. Reflect. Improve.</h3>
+          <p>Start a guided quiz, ask for hints, and receive explanations when you need help. Your quiz progress stays in this classroom session.</p>
           <div className="ai-side-rule"/>
           <strong>MY CURRICULUM</strong>
           <span>{selectedSubjects.length} selected {selectedSubjects.length === 1 ? "subject" : "subjects"}</span>
