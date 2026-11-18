@@ -92,7 +92,7 @@ export default function AIClassroom({ selectedSubjects, onOpenCurriculum }: Prop
       });
       const data: { reply?: string; error?: string } = await response.json();
       if (!response.ok || !data.reply) throw new Error(data.error || "The tutor is temporarily unavailable.");
-      chatHistoryRef.current = [...chatHistoryRef.current, { role: "user", text: question }, { role: "model", text: data.reply }].slice(-12);
+      chatHistoryRef.current = [...chatHistoryRef.current, { role: "user" as const, text: question }, { role: "model" as const, text: data.reply! }].slice(-12);
       setMessages(current => [...current, { role: "tutor", text: data.reply! }]);
       if (voiceRef.current) speak(data.reply);
     } catch (error) {
