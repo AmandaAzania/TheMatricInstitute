@@ -21,12 +21,33 @@ type SpeechWindow = Window & {
   webkitSpeechRecognition?: RecognitionConstructor;
 };
 
-const welcome = "Welcome, young scholar! I'm Professor Dumbledore, your fictional AI study guide. Everyone learns differently. Together we'll find the explanations and practice that work best for you, at your own pace.";
-const suggestions = ["quiz", "hint", "Help me make a study plan", "Explain algebra", "How do I prepare for exams?"];
+const welcome = "Welcome to your learning space! I'm your AI tutor. You can give me a name, choose a subject, and tell me how you prefer to start. We'll adapt as we learn together.";
+const subjectQuestions: Record<string, string> = {
+  "Mathematics": "Help me understand quadratic equations",
+  "Mathematical Literacy": "Show me how to calculate percentages in a budget",
+  "Physical Sciences": "Explain Newton's laws with examples",
+  "Life Sciences": "Explain meiosis in simple terms",
+  "English": "Help me analyse a poem",
+  "Geography": "Explain tropical cyclones",
+  "History": "Help me understand the Cold War",
+  "Accounting": "Explain cash flow statements",
+  "Business Studies": "Explain the functions of management",
+  "Economics": "Explain inflation and its effects",
+  "Agricultural Sciences": "Explain soil fertility",
+  "Computer Applications Technology": "Explain spreadsheet formulas",
+  "Information Technology": "Explain object-oriented programming",
+  "Tourism": "Explain sustainable tourism",
+  "Exam Skills": "Help me plan my exam revision",
+};
 const subjects = ["Mathematics", "Mathematical Literacy", "Physical Sciences", "Life Sciences", "English", "Geography", "History", "Accounting", "Business Studies", "Economics", "Agricultural Sciences", "Computer Applications Technology", "Information Technology", "Tourism", "Exam Skills"];
 
 export default function AIClassroom({ selectedSubjects, onOpenCurriculum }: Props) {
   const [messages, setMessages] = useState<Message[]>([{ role: "tutor", text: welcome }]);
+  const [tutorName, setTutorName] = useState(() => {
+    try { return localStorage.getItem("tmi_tutor_name") || ""; } catch { return ""; }
+  });
+  const displayName = tutorName.trim() || "Your AI tutor";
+  const suggestions = [subjectQuestions[topic] || "Help me understand this subject", "Quiz me on this subject", "Give me a hint", "Help me make a study plan", "How do I prepare for exams?"];
   const [draft, setDraft] = useState("");
   const [loading, setLoading] = useState(false);
   const [apiStatus, setApiStatus] = useState("");
@@ -48,6 +69,7 @@ export default function AIClassroom({ selectedSubjects, onOpenCurriculum }: Prop
     Boolean((window as SpeechWindow).SpeechRecognition || (window as SpeechWindow).webkitSpeechRecognition);
 
   useEffect(() => { voiceRef.current = voiceEnabled; }, [voiceEnabled]);
+  useEffect(() => { try { localStorage.setItem("tmi_tutor_name", tutorName.trim().slice(0, 40)); } catch { /* storage may be unavailable */ } }, [tutorName]);
   useEffect(() => { scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" }); }, [messages]);
   useEffect(() => () => {
     if (typeof window !== "undefined" && "speechSynthesis" in window) window.speechSynthesis.cancel();
@@ -90,7 +112,7 @@ export default function AIClassroom({ selectedSubjects, onOpenCurriculum }: Prop
       const response = await fetch(`${apiUrl.replace(/\/$/, "")}/api/tutor/chat`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ message: question, topic, learningPreference, subjects: selectedSubjects, history: chatHistoryRef.current.slice(-12) }),
+        body: JSON.stringify({ message: question, topic, tutorName: displayName, learningPreference, subjects: selectedSubjects, history: chatHistoryRef.current.slice(-12) }),
       });
       const data: { reply?: string; error?: string } = await response.json();
       if (!response.ok || !data.reply) throw new Error(data.error || "The tutor is temporarily unavailable.");
@@ -112,7 +134,7 @@ export default function AIClassroom({ selectedSubjects, onOpenCurriculum }: Prop
     setStarted(true);
     chatHistoryRef.current = [];
     setApiStatus("");
-    setMessages([{ role: "tutor", text: `Wonderful choice! Welcome to ${subjectChoice}. I'm Professor Dumbledore. I'll adapt my explanations and practice to your feedback. We'll begin with ${learningPreference.toLowerCase()}, but you can change that any time. What would you like to learn first?` }]);
+    setMessages([{ role: "tutor", text: `Wonderful choice! Welcome to ${subjectChoice}. I'm ${displayName}, your AI tutor. I'll adapt my explanations and practice to your feedback. We'll begin with ${learningPreference.toLowerCase()}, but you can change that any time. What would you like to learn first?` }]);
   };
 
   const changeSubject = (nextSubject: string) => {
@@ -131,7 +153,7 @@ export default function AIClassroom({ selectedSubjects, onOpenCurriculum }: Prop
       setVoiceEnabled(false);
     } else if (voiceSupported) {
       setVoiceEnabled(true);
-      speak("Hello! I'm Professor Dumbledore, your study guide. What shall we learn today?");
+      speak(`Hello! I'm ${displayName}, your AI tutor. What shall we learn today?`);
     }
   };
 
@@ -168,7 +190,9 @@ export default function AIClassroom({ selectedSubjects, onOpenCurriculum }: Prop
       </div>
       {!started ? (
         <div className="ai-welcome-panel">
-          <div className="ai-welcome-professor"><GraduationCap size={30}/><div><strong>Professor Dumbledore</strong><p>{welcome}</p></div></div>
+          <div className="ai-welcome-professor"><GraduationCap size={30}/><div><strong>{displayName}</strong><p>{welcome}</p></div></div>
+          <label className="ai-learning-label" htmlFor="ai-tutor-name">Give your tutor a name (optional)</label>
+          <input id="ai-tutor-name" className="ai-learning-select" maxLength={40} value={tutorName} onChange={e => setTutorName(e.target.value)} placeholder="e.g. Nova" />
           <h2>What would you like to learn today?</h2>
           <p>Choose a subject before your lesson begins. You can switch subjects later.</p>
           <div className="ai-subject-grid" role="group" aria-label="Choose your subject">
@@ -186,8 +210,8 @@ export default function AIClassroom({ selectedSubjects, onOpenCurriculum }: Prop
           <div className="ai-tutor-header">
             <div className="ai-professor-avatar" aria-hidden="true"><GraduationCap size={27}/><Sparkles size={14}/></div>
             <div className="ai-professor-title">
-              <strong>Professor Dumbledore</strong>
-              <small>FICTIONAL STUDY GUIDE · {import.meta.env.VITE_TUTOR_API_URL ? "LIVE AI" : "DEMO MODE"}</small>
+              <strong>{displayName}</strong>
+              <small>PERSONALISED AI TUTOR · {import.meta.env.VITE_TUTOR_API_URL ? "LIVE AI" : "DEMO MODE"}</small>
             </div>
             <div className="ai-voice-controls">
               <button type="button" onClick={toggleVoice} disabled={!voiceSupported} title={voiceEnabled ? "Turn spoken answers off" : "Turn spoken answers on"} aria-label={voiceEnabled ? "Turn spoken answers off" : "Turn spoken answers on"}>
@@ -206,7 +230,7 @@ export default function AIClassroom({ selectedSubjects, onOpenCurriculum }: Prop
           <div className="ai-chat-history" ref={scrollRef} role="log" aria-label="Classroom conversation" aria-live="polite">
             {messages.map((message, i) => (
               <div className={`ai-chat-message ai-chat-${message.role}`} key={i}>
-                <div className="ai-chat-speaker">{message.role === "tutor" ? "PROFESSOR DUMBLEDORE" : "YOU"}</div>
+                <div className="ai-chat-speaker">{message.role === "tutor" ? displayName.toUpperCase() : "YOU"}</div>
                 <p>{message.text}</p>
                 {message.role === "tutor" && voiceSupported && <button type="button" onClick={() => speak(message.text)} aria-label="Read this answer aloud"><Volume2 size={14}/> Listen</button>}
               </div>
@@ -225,10 +249,10 @@ export default function AIClassroom({ selectedSubjects, onOpenCurriculum }: Prop
               <button type="submit" aria-label="Send message" disabled={!draft.trim() || loading}><Send size={19}/></button>
             </div>
           </form>
-          {loading && <p className="ai-disclaimer" role="status">Professor Dumbledore is thinking...</p>}
+          {loading && <p className="ai-disclaimer" role="status">{displayName} is thinking...</p>}
           {apiStatus && <p className="ai-voice-error" role="status">{apiStatus}</p>}
           {voiceError && <p className="ai-voice-error" role="status">{voiceError}</p>}
-          <p className="ai-disclaimer">Voice and microphone availability depend on your browser. No human professor is speaking.</p>
+          <p className="ai-disclaimer">Voice and microphone availability depend on your browser. The tutor uses an AI-generated response and browser speech.</p>
         </div>
         <aside className="ai-side-panel">
           <span className="eyebrow">YOUR LEARNING SPACE</span>
@@ -238,7 +262,7 @@ export default function AIClassroom({ selectedSubjects, onOpenCurriculum }: Prop
           <strong>MY CURRICULUM</strong>
           <span>{selectedSubjects.length} selected {selectedSubjects.length === 1 ? "subject" : "subjects"}</span>
           <button type="button" onClick={onOpenCurriculum}>View my curriculum <ArrowUpRight size={15}/></button>
-          <div className="ai-professor-footnote"><BookOpen size={17}/><span>Inspired by a fictional wizarding-school professor. Not an official Harry Potter product.</span></div>
+          <div className="ai-professor-footnote"><BookOpen size={17}/><span>Your AI tutor adapts to your questions and preferences. Always check important answers against trusted study materials.</span></div>
         </aside>
       </div>}
     </section>
