@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { ArrowUpRight, BookOpen, GraduationCap, Lightbulb, Mic, MicOff, Send, Sparkles, Square, Volume2, VolumeX, WandSparkles } from "lucide-react";
 import "./AIClassroom.css";
-import { initialSession, replyToLearner, type TutorTopic } from "./tutorEngine";
+import { initialSession, replyToLearner } from "./tutorEngine";
 
 type Props = { selectedSubjects: string[]; onOpenCurriculum: () => void };
 type Message = { role: "tutor" | "student"; text: string };
@@ -21,9 +21,9 @@ type SpeechWindow = Window & {
   webkitSpeechRecognition?: RecognitionConstructor;
 };
 
-const welcome = "Welcome! I'm Professor Dumbledore, your fictional study guide. Choose a subject below, ask me for an explanation, or type 'quiz' to start practising. I can offer hints and check your answers.";
+const welcome = "Welcome, young scholar! I'm Professor Dumbledore, your fictional AI study guide. Everyone learns differently. Together we'll find the explanations and practice that work best for you, at your own pace.";
 const suggestions = ["quiz", "hint", "Help me make a study plan", "Explain algebra", "How do I prepare for exams?"];
-const topics: TutorTopic[] = ["Mathematics", "English", "Science", "Exam Skills"];
+const subjects = ["Mathematics", "Mathematical Literacy", "Physical Sciences", "Life Sciences", "English", "Geography", "History", "Accounting", "Business Studies", "Economics", "Agricultural Sciences", "Computer Applications Technology", "Information Technology", "Tourism", "Exam Skills"];
 
 export default function AIClassroom({ selectedSubjects, onOpenCurriculum }: Props) {
   const [messages, setMessages] = useState<Message[]>([{ role: "tutor", text: welcome }]);
@@ -31,7 +31,10 @@ export default function AIClassroom({ selectedSubjects, onOpenCurriculum }: Prop
   const [loading, setLoading] = useState(false);
   const [apiStatus, setApiStatus] = useState("");
   const chatHistoryRef = useRef<{ role: "user" | "model"; text: string }[]>([]);
-  const [topic, setTopic] = useState<TutorTopic>("Mathematics");
+  const [topic, setTopic] = useState<string>("");
+  const [subjectChoice, setSubjectChoice] = useState<string>("");
+  const [started, setStarted] = useState(false);
+  const [learningPreference, setLearningPreference] = useState("Explain simply");
   const sessionRef = useRef(initialSession());
   const [voiceEnabled, setVoiceEnabled] = useState(false);
   const [speaking, setSpeaking] = useState(false);
@@ -69,16 +72,15 @@ export default function AIClassroom({ selectedSubjects, onOpenCurriculum }: Prop
 
   const send = async (value = draft) => {
     const question = value.trim();
-    if (!question || loading) return;
+    if (!question || loading || !started) return;
     setDraft("");
     setMessages(current => [...current, { role: "student", text: question }]);
     const apiUrl = import.meta.env.VITE_TUTOR_API_URL as string | undefined;
     if (!apiUrl) {
       const result = replyToLearner(question, sessionRef.current, selectedSubjects);
       sessionRef.current = result.session;
-      setTopic(result.session.topic);
       setMessages(current => [...current, { role: "tutor", text: result.text }]);
-      setApiStatus("Demo mode: configure VITE_TUTOR_API_URL to enable real AI.");
+      setApiStatus("Guided demo uses limited built-in topics. Configure VITE_TUTOR_API_URL for personalised subject tutoring.");
       if (voiceRef.current) speak(result.text);
       return;
     }
@@ -88,7 +90,7 @@ export default function AIClassroom({ selectedSubjects, onOpenCurriculum }: Prop
       const response = await fetch(`${apiUrl.replace(/\/$/, "")}/api/tutor/chat`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ message: question, topic, subjects: selectedSubjects, history: chatHistoryRef.current.slice(-12) }),
+        body: JSON.stringify({ message: question, topic, learningPreference, subjects: selectedSubjects, history: chatHistoryRef.current.slice(-12) }),
       });
       const data: { reply?: string; error?: string } = await response.json();
       if (!response.ok || !data.reply) throw new Error(data.error || "The tutor is temporarily unavailable.");
@@ -104,17 +106,22 @@ export default function AIClassroom({ selectedSubjects, onOpenCurriculum }: Prop
     }
   };
 
-  const chooseTopic = (nextTopic: TutorTopic) => {
-    setTopic(nextTopic);
+  const startLesson = () => {
+    if (!subjectChoice) return;
+    setTopic(subjectChoice);
+    setStarted(true);
     chatHistoryRef.current = [];
-    if (import.meta.env.VITE_TUTOR_API_URL) {
-      setMessages(current => [...current, { role: "tutor", text: `Let's study ${nextTopic}. Ask me anything, or say "quiz me" to practise.` }]);
-    } else {
-      const result = replyToLearner(nextTopic, sessionRef.current, selectedSubjects);
-      sessionRef.current = result.session;
-      setMessages(current => [...current, { role: "tutor", text: result.text }]);
-      if (voiceRef.current) speak(result.text);
-    }
+    setApiStatus("");
+    setMessages([{ role: "tutor", text: `Wonderful choice! Welcome to ${subjectChoice}. I'm Professor Dumbledore. I'll adapt my explanations and practice to your feedback. We'll begin with ${learningPreference.toLowerCase()}, but you can change that any time. What would you like to learn first?` }]);
+  };
+
+  const changeSubject = (nextSubject: string) => {
+    if (loading || nextSubject === topic) return;
+    setTopic(nextSubject);
+    setSubjectChoice(nextSubject);
+    chatHistoryRef.current = [];
+    setMessages([{ role: "tutor", text: `Welcome to ${nextSubject}! Let's begin a fresh lesson. Tell me what you want to learn, or ask me for a quiz.` }]);
+    setApiStatus("");
   };
 
   const toggleVoice = () => {
@@ -159,7 +166,22 @@ export default function AIClassroom({ selectedSubjects, onOpenCurriculum }: Prop
         </div>
         <span className="ai-coming-soon">{import.meta.env.VITE_TUTOR_API_URL ? "LIVE AI" : "GUIDED DEMO"}</span>
       </div>
-      <div className="ai-classroom-layout">
+      {!started ? (
+        <div className="ai-welcome-panel">
+          <div className="ai-welcome-professor"><GraduationCap size={30}/><div><strong>Professor Dumbledore</strong><p>{welcome}</p></div></div>
+          <h2>What would you like to learn today?</h2>
+          <p>Choose a subject before your lesson begins. You can switch subjects later.</p>
+          <div className="ai-subject-grid" role="group" aria-label="Choose your subject">
+            {subjects.map(subject => <button type="button" key={subject} className={subjectChoice === subject ? "ai-subject-option selected" : "ai-subject-option"} aria-pressed={subjectChoice === subject} onClick={() => setSubjectChoice(subject)}><BookOpen size={16}/>{subject}</button>)}
+          </div>
+          <label className="ai-learning-label" htmlFor="ai-learning-preference">How would you like to start?</label>
+          <select id="ai-learning-preference" className="ai-learning-select" value={learningPreference} onChange={e => setLearningPreference(e.target.value)}>
+            <option>Explain simply</option><option>Show an example</option><option>Quiz me</option><option>Help me revise</option>
+          </select>
+          <button type="button" className="ai-start-button" disabled={!subjectChoice} onClick={startLesson}>Start learning <ArrowUpRight size={17}/></button>
+          <p className="ai-welcome-note">AI-generated answers may contain mistakes. Avoid sharing personal information.</p>
+        </div>
+      ) : <div className="ai-classroom-layout">
         <div className="ai-main-panel">
           <div className="ai-tutor-header">
             <div className="ai-professor-avatar" aria-hidden="true"><GraduationCap size={27}/><Sparkles size={14}/></div>
@@ -176,9 +198,10 @@ export default function AIClassroom({ selectedSubjects, onOpenCurriculum }: Prop
             </div>
           </div>
           <div className="ai-demo-notice"><WandSparkles size={16}/><span>{import.meta.env.VITE_TUTOR_API_URL ? "Live Gemini tutor: AI-generated explanations may contain mistakes. Do not share personal information." : "Guided demo: quizzes and explanations run locally until the AI backend is configured."}</span></div>
-          <div className="ai-topic-picker" aria-label="Choose a learning topic">
-            <span>YOUR CURRENT TOPIC</span>
-            <div>{topics.map(item => <button type="button" key={item} className={topic === item ? "ai-topic-selected" : ""} onClick={() => chooseTopic(item)} aria-pressed={topic === item}>{item}</button>)}</div>
+          <div className="ai-topic-picker" aria-label="Choose a learning subject">
+            <span>CURRENT SUBJECT: {topic}</span>
+            <div><label htmlFor="ai-switch-subject">Switch subject: </label><select id="ai-switch-subject" className="ai-learning-select" value={topic} disabled={loading} onChange={e => changeSubject(e.target.value)}>{subjects.map(item => <option key={item} value={item}>{item}</option>)}</select></div>
+            <div><label htmlFor="ai-change-preference">Learning approach: </label><select id="ai-change-preference" className="ai-learning-select" value={learningPreference} onChange={e => setLearningPreference(e.target.value)}><option>Explain simply</option><option>Show an example</option><option>Quiz me</option><option>Help me revise</option></select></div>
           </div>
           <div className="ai-chat-history" ref={scrollRef} role="log" aria-label="Classroom conversation" aria-live="polite">
             {messages.map((message, i) => (
@@ -217,7 +240,7 @@ export default function AIClassroom({ selectedSubjects, onOpenCurriculum }: Prop
           <button type="button" onClick={onOpenCurriculum}>View my curriculum <ArrowUpRight size={15}/></button>
           <div className="ai-professor-footnote"><BookOpen size={17}/><span>Inspired by a fictional wizarding-school professor. Not an official Harry Potter product.</span></div>
         </aside>
-      </div>
+      </div>}
     </section>
   );
 }

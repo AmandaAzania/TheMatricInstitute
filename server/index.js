@@ -47,6 +47,7 @@ createServer(async (req, res) => {
     const body = JSON.parse(raw);
     if (typeof body.message !== "string" || !body.message.trim() || body.message.length > 1500) return send(res, 400, { error: "Please enter a question under 1500 characters." }, ORIGIN);
     const topic = typeof body.topic === "string" ? body.topic.slice(0, 70) : "General";
+    const learningPreference = typeof body.learningPreference === "string" ? body.learningPreference.slice(0, 50) : "Explain simply";
     const subjects = Array.isArray(body.subjects) ? body.subjects.filter(s => typeof s === "string").slice(0, 12).map(s => s.slice(0, 80)) : [];
     const history = Array.isArray(body.history) ? body.history.slice(-12).filter(m => m && ["user", "model"].includes(m.role) && typeof m.text === "string").map(m => ({ role: m.role, parts: [{ text: m.text.slice(0, 1500) }] })) : [];
     const contents = [...history, { role: "user", parts: [{ text: body.message }] }];
@@ -57,7 +58,7 @@ createServer(async (req, res) => {
       upstream = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(MODEL)}:generateContent`, {
         method: "POST",
         headers: { "Content-Type": "application/json", "x-goog-api-key": KEY },
-        body: JSON.stringify({ systemInstruction: { parts: [{ text: `${systemInstruction}\nCurrent subject: ${topic}. Learner-selected subjects: ${subjects.join(", ") || "not selected"}.` }] }, contents, generationConfig: { maxOutputTokens: 600, temperature: 0.5 } }),
+        body: JSON.stringify({ systemInstruction: { parts: [{ text: `${systemInstruction}\nCurrent subject: ${topic}. Preferred starting approach: ${learningPreference}. Adapt your teaching approach to the learner's responses and preferences, not a fixed learning-style label. If asked about another school subject, briefly offer to switch and still give a short helpful answer. Learner-selected subjects: ${subjects.join(", ") || "not selected"}.` }] }, contents, generationConfig: { maxOutputTokens: 600, temperature: 0.5 } }),
         signal: controller.signal,
       });
     } finally { clearTimeout(timer); }

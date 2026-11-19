@@ -36,3 +36,21 @@
 .ai-topic-picker button.ai-topic-selected{background:#641f32;color:#fff;border-color:#641f32}
 .ai-chat-message p{white-space:pre-wrap}
 @media(max-width:560px){.ai-topic-picker{padding:15px 14px}}
+
+/* Personalised classroom onboarding */
+.ai-welcome-panel { max-width: 860px; margin: 0 auto; padding: 32px; background: #fff; border: 1px solid #e8ded6; border-radius: 20px; box-shadow: 0 8px 32px rgba(50,35,25,.05); }
+.ai-welcome-panel h2 { margin: 26px 0 8px; font-size: 1.5rem; }
+.ai-welcome-panel p { line-height: 1.65; }
+.ai-welcome-professor { display: flex; align-items: flex-start; gap: 16px; padding: 22px; border-radius: 16px; background: #f7f2ec; }
+.ai-welcome-professor strong { display: block; margin-bottom: 8px; }
+.ai-welcome-professor p { margin: 0; }
+.ai-subject-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 10px; margin: 20px 0 26px; }
+.ai-subject-option { display: flex; align-items: center; gap: 9px; padding: 13px; min-height: 48px; border: 1px solid #d9d0c9; border-radius: 12px; background: #fff; color: #292522; text-align: left; cursor: pointer; font: inherit; }
+.ai-subject-option.selected { border: 2px solid #665283; background: #f0ebf6; font-weight: 600; }
+.ai-subject-option:focus-visible, .ai-start-button:focus-visible, .ai-learning-select:focus-visible { outline: 3px solid #8d73b1; outline-offset: 2px; }
+.ai-learning-label { display: block; font-weight: 600; margin: 0 0 8px; }
+.ai-learning-select { max-width: 100%; padding: 10px 12px; border: 1px solid #d9d0c9; border-radius: 9px; background: #fff; color: #292522; font: inherit; }
+.ai-start-button { display: flex; align-items: center; justify-content: center; gap: 8px; margin-top: 22px; padding: 14px 22px; border: 0; border-radius: 11px; background: #292522; color: #fff; font: inherit; cursor: pointer; }
+.ai-start-button:disabled { opacity: .45; cursor: not-allowed; }
+.ai-welcome-note { font-size: .82rem; color: #746b65; margin-top: 18px; }
+@media (max-width: 600px) { .ai-welcome-panel { padding: 20px 16px; } .ai-welcome-professor { padding: 16px; } .ai-subject-grid { grid-template-columns: repeat(2, minmax(0,1fr)); } .ai-subject-option { font-size: .85rem; } }
