@@ -1,6 +1,7 @@
 
 import { useEffect, useState } from "react";
 import PastPapers from "./components/PastPapers";
+import StudyGuides from "./components/StudyGuides";
 import AIClassroom from "./components/AIClassroom";
 
 import {
@@ -289,7 +290,7 @@ const features = [
     label: "ASSESSMENT CENTRE",
   },
   {
-    title: "Study Resources",
+    title: "Study Guides",
     description: "Access notes, guides and revision material.",
     icon: Library,
     label: "ACADEMIC RESOURCES",
@@ -432,6 +433,10 @@ function App() {
     {
       name: "Past Papers",
       icon: Library,
+    },
+    {
+      name: "Study Guides",
+      icon: BookMarked,
     },
     {
       name: "Practice Exams",
@@ -1085,6 +1090,8 @@ function App() {
               4. PAST PAPERS LIBRARY
           ====================================== */}
 
+          {activePage === "Study Guides" && <StudyGuides />}
+
           {activePage === "Past Papers" && (
 
             <PastPapers
@@ -1235,6 +1242,7 @@ function App() {
             currentSubject &&
             activePage !== "Subjects" &&
             activePage !== "Past Papers" &&
+            activePage !== "Study Guides" &&
             activePage !== "Dashboard" &&
             activePage !== "My Curriculum" &&
             activePage !== "AI Classroom" && (
@@ -1281,7 +1289,8 @@ function App() {
             activePage !== "Dashboard" &&
             activePage !== "Subjects" &&
             activePage !== "My Subjects" &&
-            activePage !== "Past Papers" && (
+            activePage !== "Past Papers" &&
+            activePage !== "Study Guides" && (
 
             <section className="placeholder-page">
 
