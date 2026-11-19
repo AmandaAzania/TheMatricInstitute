@@ -61,7 +61,18 @@ createServer(async (req, res) => {
         signal: controller.signal,
       });
     } finally { clearTimeout(timer); }
-    if (!upstream.ok) return send(res, upstream.status === 429 ? 429 : 502, { error: upstream.status === 429 ? "AI free-tier limit reached. Please try later." : "AI provider is temporarily unavailable." }, ORIGIN);
+    if (!upstream.ok) {
+      // Log only the HTTP status and a safe, allowlisted category. Never log keys, prompts, or raw provider responses.
+      const category = ({
+        400: "INVALID_REQUEST_OR_MODEL", 401: "UNAUTHORIZED_KEY", 403: "PERMISSION_DENIED_OR_KEY_RESTRICTION",
+        404: "MODEL_NOT_FOUND", 429: "RATE_LIMIT_OR_QUOTA", 500: "PROVIDER_INTERNAL_ERROR",
+        502: "PROVIDER_GATEWAY_ERROR", 503: "PROVIDER_UNAVAILABLE", 504: "PROVIDER_TIMEOUT",
+      })[upstream.status] || "OTHER_PROVIDER_ERROR";
+      console.error(`[Gemini API] HTTP ${upstream.status}; category=${category}`);
+      return send(res, upstream.status === 429 ? 429 : 502, {
+        error: upstream.status === 429 ? "AI free-tier limit reached. Please try later." : "AI provider is temporarily unavailable."
+      }, ORIGIN);
+    }
     const result = await upstream.json();
     const reply = result.candidates?.[0]?.content?.parts?.map(p => p.text || "").join(" ").trim();
     if (!reply) return send(res, 502, { error: "The AI did not return an answer. Please try again." }, ORIGIN);
