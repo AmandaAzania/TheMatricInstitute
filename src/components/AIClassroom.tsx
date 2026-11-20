@@ -47,12 +47,12 @@ export default function AIClassroom({ selectedSubjects, onOpenCurriculum }: Prop
     try { return localStorage.getItem("tmi_tutor_name") || ""; } catch { return ""; }
   });
   const displayName = tutorName.trim() || "Your AI tutor";
-  const suggestions = [subjectQuestions[topic] || "Help me understand this subject", "Quiz me on this subject", "Give me a hint", "Help me make a study plan", "How do I prepare for exams?"];
   const [draft, setDraft] = useState("");
   const [loading, setLoading] = useState(false);
   const [apiStatus, setApiStatus] = useState("");
   const chatHistoryRef = useRef<{ role: "user" | "model"; text: string }[]>([]);
   const [topic, setTopic] = useState<string>("");
+  const suggestions = [subjectQuestions[topic] || "Help me understand this subject", "Quiz me on this subject", "Give me a hint", "Help me make a study plan", "How do I prepare for exams?"];
   const [subjectChoice, setSubjectChoice] = useState<string>("");
   const [started, setStarted] = useState(false);
   const [learningPreference, setLearningPreference] = useState("Explain simply");
