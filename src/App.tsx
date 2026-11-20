@@ -2,6 +2,10 @@
 import { useEffect, useState } from "react";
 import PastPapers from "./components/PastPapers";
 import StudyGuides from "./components/StudyGuides";
+import AuthGate from "./components/AuthGate";
+import Onboarding from "./components/Onboarding";
+import PracticeProgress from "./components/PracticeProgress";
+import {validSession,signOut,getProfile,putProfile,type Session,type LearnerProfile} from "./lib/supabase";
 import AIClassroom from "./components/AIClassroom";
 
 import {
@@ -302,6 +306,14 @@ const features = [
 // ==========================================
 
 function App() {
+  const [session,setSession]=useState<Session|null>(null);
+  const [checking,setChecking]=useState(true);
+  const [profile,setProfile]=useState<LearnerProfile|null>(null);
+  const [profileLoaded,setProfileLoaded]=useState(false);
+  useEffect(()=>{let active=true;validSession().then(async s=>{if(!active)return;setSession(s);if(s){try{setProfile(await getProfile(s));}catch(e){console.error("Unable to load learner profile",e);}}setProfileLoaded(true);}).finally(()=>{if(active)setChecking(false);});return()=>{active=false;};},[]);
+  const signedIn=async(s:Session)=>{setSession(s);setProfileLoaded(false);try{setProfile(await getProfile(s));}catch{setProfile(null);}setProfileLoaded(true);};
+  const signedOut=async()=>{await signOut();setSession(null);setProfile(null);setProfileLoaded(true);setActivePage("Dashboard");};
+
   // NAVIGATION STATE
 
   const [activePage, setActivePage] = useState("Dashboard");
@@ -345,6 +357,9 @@ function App() {
       return [];
     }
   });
+
+  useEffect(()=>{if(profile){setMySubjects(profile.subjects);try{localStorage.setItem("tmi_tutor_name",profile.tutor_name);}catch{}}},[profile]);
+  useEffect(()=>{if(!session||!profile)return;const timer=setTimeout(()=>{putProfile(session,{display_name:profile.display_name,tutor_name:profile.tutor_name,goal:profile.goal,subjects:mySubjects}).catch(console.error);},700);return()=>clearTimeout(timer);},[mySubjects,session,profile]);
 
   // SAVE SELECTED SUBJECTS TO BROWSER STORAGE
 
@@ -438,16 +453,17 @@ function App() {
       name: "Study Guides",
       icon: BookMarked,
     },
-    {
-      name: "Practice Exams",
-      icon: ClipboardCheck,
-    },
+    { name: "Practice Exams", icon: ClipboardCheck },
+    { name: "My Progress", icon: Award },
   ];
 
   // ==========================================
   // RENDER APPLICATION
   // ==========================================
 
+  if(checking||!profileLoaded)return <main className="account-page"><p>Loading your learning space…</p></main>;
+  if(!session)return <AuthGate onSignedIn={signedIn}/>;
+  if(!profile)return <Onboarding session={session} initial={null} onSaved={setProfile}/>;
   return (
     <div className="app-shell">
 
@@ -545,15 +561,16 @@ function App() {
 
             <h4>Academic Access</h4>
 
-            <p>12-month learning access</p>
+            <p>Free pilot learning access</p>
 
             <div className="membership-status">
               <span className="status-dot" />
-              Preview account
+              Free pilot account
             </div>
 
           </div>
 
+          <button className="nav-item" onClick={signedOut} style={{marginBottom:12}}>Sign out</button>
           <div className="sidebar-footer">
             <span>AN INSTITUTION FOR EVERY AMBITION.</span>
             <span>EST. 2026</span>
@@ -610,11 +627,11 @@ function App() {
             <div className="profile">
 
               <div className="profile-avatar">
-                ST
+                {profile.display_name.slice(0,2).toUpperCase()}
               </div>
 
               <div className="profile-info">
-                <strong>Student Name</strong>
+                <strong>{profile.display_name}</strong>
                 <span>Matric Candidate</span>
               </div>
 
@@ -1091,6 +1108,8 @@ function App() {
           ====================================== */}
 
           {activePage === "Study Guides" && <StudyGuides />}
+          {activePage === "Practice Exams" && <PracticeProgress session={session} mode="practice" />}
+          {activePage === "My Progress" && <PracticeProgress session={session} mode="progress" />}
 
           {activePage === "Past Papers" && (
 
