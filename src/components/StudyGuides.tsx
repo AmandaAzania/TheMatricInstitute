@@ -33,12 +33,12 @@ export default function StudyGuides() {
       ) : (
         <div className="study-guides-grid">{guides.map(guide => (
           <article className="study-guides-card" key={guide.id}>
-            <span>{guide.subject} · Grade {guide.grade}</span>
+            <span>STUDY GUIDE · {guide.subject} · Grade {guide.grade}</span>
             <h2>{guide.title}</h2>
             <p>{guide.description}</p>
             <small>{guide.publisher} · {guide.topics.join(", ")}</small>
             <div className="study-guides-actions">
-              <a href={guide.url} target="_blank" rel="noopener noreferrer"><ExternalLink size={16}/> Read online</a>
+              <a href={guide.url} target="_blank" rel="noopener noreferrer"><ExternalLink size={16}/> Preview PDF</a>
               <a href={guide.url} download><Download size={16}/> Download PDF</a>
             </div>
           </article>

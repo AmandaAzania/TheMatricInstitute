@@ -870,18 +870,18 @@ function App() {
                   </span>
 
                   <h2>
-                    Your personal academic tutor is coming.
+                    Your personal AI tutor is ready to help.
                   </h2>
 
                   <p>
-                    Experience guided lessons, personalised
+                    Explore guided lessons, personalised
                     explanations and interactive revision.
                   </p>
 
                 </div>
 
                 <span className="coming-soon">
-                  COMING SOON
+                  READY TO LEARN
                 </span>
 
               </section>

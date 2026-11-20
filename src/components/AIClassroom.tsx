@@ -39,13 +39,14 @@ const subjectQuestions: Record<string, string> = {
   "Tourism": "Explain sustainable tourism",
   "Exam Skills": "Help me plan my exam revision",
 };
-const subjects = ["Mathematics", "Mathematical Literacy", "Physical Sciences", "Life Sciences", "English", "Geography", "History", "Accounting", "Business Studies", "Economics", "Agricultural Sciences", "Computer Applications Technology", "Information Technology", "Tourism", "Exam Skills"];
+const allSubjects = ["Mathematics", "Mathematical Literacy", "Physical Sciences", "Life Sciences", "English", "Geography", "History", "Accounting", "Business Studies", "Economics", "Agricultural Sciences", "Computer Applications Technology", "Information Technology", "Tourism", "Exam Skills"];
 
 export default function AIClassroom({ selectedSubjects, onOpenCurriculum }: Props) {
   const [messages, setMessages] = useState<Message[]>([{ role: "tutor", text: welcome }]);
-  const [tutorName, setTutorName] = useState(() => {
+  const [tutorName] = useState(() => {
     try { return localStorage.getItem("tmi_tutor_name") || ""; } catch { return ""; }
   });
+  const subjects = selectedSubjects.length ? selectedSubjects : allSubjects;
   const displayName = tutorName.trim() || "Your AI tutor";
   const [draft, setDraft] = useState("");
   const [loading, setLoading] = useState(false);
@@ -191,10 +192,8 @@ export default function AIClassroom({ selectedSubjects, onOpenCurriculum }: Prop
       {!started ? (
         <div className="ai-welcome-panel">
           <div className="ai-welcome-professor"><GraduationCap size={30}/><div><strong>{displayName}</strong><p>{welcome}</p></div></div>
-          <label className="ai-learning-label" htmlFor="ai-tutor-name">Give your tutor a name (optional)</label>
-          <input id="ai-tutor-name" className="ai-learning-select" maxLength={40} value={tutorName} onChange={e => setTutorName(e.target.value)} placeholder="e.g. Nova" />
           <h2>What would you like to learn today?</h2>
-          <p>Choose a subject before your lesson begins. You can switch subjects later.</p>
+          <p>Choose from your subjects. You can update your subjects in My Curriculum.</p>
           <div className="ai-subject-grid" role="group" aria-label="Choose your subject">
             {subjects.map(subject => <button type="button" key={subject} className={subjectChoice === subject ? "ai-subject-option selected" : "ai-subject-option"} aria-pressed={subjectChoice === subject} onClick={() => setSubjectChoice(subject)}><BookOpen size={16}/>{subject}</button>)}
           </div>
