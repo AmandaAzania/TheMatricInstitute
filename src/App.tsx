@@ -1264,7 +1264,9 @@ function App() {
             activePage !== "Study Guides" &&
             activePage !== "Dashboard" &&
             activePage !== "My Curriculum" &&
-            activePage !== "AI Classroom" && (
+            activePage !== "AI Classroom" &&
+            activePage !== "Practice Exams" &&
+            activePage !== "My Progress" && (
 
             <section className="placeholder-page">
 
@@ -1309,7 +1311,11 @@ function App() {
             activePage !== "Subjects" &&
             activePage !== "My Subjects" &&
             activePage !== "Past Papers" &&
-            activePage !== "Study Guides" && (
+            activePage !== "Study Guides" &&
+            activePage !== "AI Classroom" &&
+            activePage !== "Practice Exams" &&
+            activePage !== "My Progress" &&
+            activePage !== "My Curriculum" && (
 
             <section className="placeholder-page">
 

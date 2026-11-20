@@ -53,7 +53,16 @@ export default function AIClassroom({ selectedSubjects, onOpenCurriculum }: Prop
   const [apiStatus, setApiStatus] = useState("");
   const chatHistoryRef = useRef<{ role: "user" | "model"; text: string }[]>([]);
   const [topic, setTopic] = useState<string>("");
-  const suggestions = [subjectQuestions[topic] || "Help me understand this subject", "Quiz me on this subject", "Give me a hint", "Help me make a study plan", "How do I prepare for exams?"];
+  const [currentQuestion, setCurrentQuestion] = useState("");
+  const suggestions = currentQuestion
+    ? [
+        "Can you explain that in simpler terms?",
+        `Give me a Grade 12 exam-style question about: ${currentQuestion.slice(0, 100)}`,
+        `What are the most important facts to remember about: ${currentQuestion.slice(0, 100)}?`,
+        "Can you give me an example and then let me try one?",
+        "How does this connect to the next topic in my subject?",
+      ]
+    : [subjectQuestions[topic] || "Help me understand this subject", "Quiz me on this subject", "Give me a hint", "Help me make a study plan", "How do I prepare for exams?"];
   const [subjectChoice, setSubjectChoice] = useState<string>("");
   const [started, setStarted] = useState(false);
   const [learningPreference, setLearningPreference] = useState("Explain simply");
@@ -97,6 +106,7 @@ export default function AIClassroom({ selectedSubjects, onOpenCurriculum }: Prop
     const question = value.trim();
     if (!question || loading || !started) return;
     setDraft("");
+    setCurrentQuestion(question);
     setMessages(current => [...current, { role: "student", text: question }]);
     const apiUrl = import.meta.env.VITE_TUTOR_API_URL as string | undefined;
     if (!apiUrl) {
@@ -132,6 +142,7 @@ export default function AIClassroom({ selectedSubjects, onOpenCurriculum }: Prop
   const startLesson = () => {
     if (!subjectChoice) return;
     setTopic(subjectChoice);
+    setCurrentQuestion("");
     setStarted(true);
     chatHistoryRef.current = [];
     setApiStatus("");
@@ -141,6 +152,7 @@ export default function AIClassroom({ selectedSubjects, onOpenCurriculum }: Prop
   const changeSubject = (nextSubject: string) => {
     if (loading || nextSubject === topic) return;
     setTopic(nextSubject);
+    setCurrentQuestion("");
     setSubjectChoice(nextSubject);
     chatHistoryRef.current = [];
     setMessages([{ role: "tutor", text: `Welcome to ${nextSubject}! Let's begin a fresh lesson. Tell me what you want to learn, or ask me for a quiz.` }]);
@@ -185,7 +197,7 @@ export default function AIClassroom({ selectedSubjects, onOpenCurriculum }: Prop
         <div>
           <span className="eyebrow">THE MATRIC INSTITUTE · INTERACTIVE LEARNING</span>
           <h1>AI Classroom<span className="ai-heading-period">.</span></h1>
-          <p>Choose a topic, practise with guided questions, get hints, and hear your professor speak.</p>
+          <p>Choose a subject, ask questions, practise and learn at your own pace.</p>
         </div>
         <span className="ai-coming-soon">{import.meta.env.VITE_TUTOR_API_URL ? "LIVE AI" : "GUIDED DEMO"}</span>
       </div>
@@ -236,14 +248,14 @@ export default function AIClassroom({ selectedSubjects, onOpenCurriculum }: Prop
             ))}
           </div>
           <div className="ai-suggestion-section">
-            <span>TRY ASKING</span>
+            <span>{currentQuestion ? "KEEP EXPLORING THIS TOPIC" : "TRY ASKING"}</span>
             <div className="ai-suggestion-list">
               {suggestions.map(item => <button key={item} type="button" onClick={() => send(item)}><Lightbulb size={14}/>{item}</button>)}
             </div>
           </div>
           <form className="ai-chat-form" onSubmit={e => { e.preventDefault(); send(); }}>
             <div className="ai-message-composer">
-              <input value={draft} onChange={e => setDraft(e.target.value)} aria-label="Ask your study guide" placeholder={listening ? "Listening..." : "Ask your study guide a question..."} />
+              <input value={draft} onChange={e => setDraft(e.target.value)} aria-label="Ask your AI tutor" placeholder={listening ? "Listening..." : "Ask your tutor a question..."} />
               <button type="button" className={listening ? "ai-mic-active" : "ai-mic-button"} onClick={toggleMic} disabled={!recognitionSupported} title={recognitionSupported ? "Dictate a question" : "Speech input unavailable"} aria-label={listening ? "Stop listening" : "Dictate a question"}>{listening ? <MicOff size={19}/> : <Mic size={19}/>}</button>
               <button type="submit" aria-label="Send message" disabled={!draft.trim() || loading}><Send size={19}/></button>
             </div>
